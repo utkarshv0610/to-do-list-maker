@@ -1,0 +1,134 @@
+
+
+import json
+import os
+
+class Task:
+    """Represents a task with title, description, category, and completion status."""
+    def __init__(self, title, description, category):
+        self.title = title
+        self.description = description
+        self.category = category
+        self.completed = False
+
+    def mark_completed(self):
+        """Mark the task as completed."""
+        self.completed = True
+
+    def __str__(self):
+        """Return a string representation of the task."""
+        status = "Completed" if self.completed else "Not Completed"
+        return f"Title: {self.title}\nDescription: {self.description}\nCategory: {self.category}\nStatus: {status}\n"
+
+def save_tasks(tasks, filename="tasks.json"):
+    """Save tasks to a JSON file."""
+    try:
+        with open(filename, 'w') as f:
+            json.dump([task.__dict__ for task in tasks], f, indent=4)
+        print("Tasks saved successfully.")
+    except Exception as e:
+        print(f"Error saving tasks: {e}")
+
+def load_tasks(filename="tasks.json"):
+    """Load tasks from a JSON file."""
+    try:
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                task_data = json.load(f)
+                return [Task(**data) for data in task_data]
+        return []
+    except Exception as e:
+        print(f"Error loading tasks: {e}")
+        return []
+
+def add_task(tasks):
+    """Add a new task to the list."""
+    title = input("Enter task title: ").strip()
+    if not title:
+        print("Title cannot be empty.")
+        return
+    description = input("Enter task description: ").strip()
+    category = input("Enter task category (e.g., Work, Personal, Urgent): ").strip()
+    if not category:
+        print("Category cannot be empty.")
+        return
+    tasks.append(Task(title, description, category))
+    print("Task added successfully.")
+
+def view_tasks(tasks):
+    """Display all tasks."""
+    if not tasks:
+        print("No tasks available.")
+        return
+    for idx, task in enumerate(tasks, 1):
+        print(f"\nTask {idx}:")
+        print(task)
+
+def mark_task_completed(tasks):
+    """Mark a task as completed."""
+    view_tasks(tasks)
+    if tasks:
+        try:
+            index = int(input("Enter the task number to mark as completed: ")) - 1
+            if 0 <= index < len(tasks):
+                if not tasks[index].completed:
+                    tasks[index].mark_completed()
+                    print("Task marked as completed.")
+                else:
+                    print("Task is already completed.")
+            else:
+                print("Invalid task number.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+def delete_task(tasks):
+    """Delete a task from the list."""
+    view_tasks(tasks)
+    if tasks:
+        try:
+            index = int(input("Enter the task number to delete: ")) - 1
+            if 0 <= index < len(tasks):
+                tasks.pop(index)
+                print("Task deleted successfully.")
+            else:
+                print("Invalid task number.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+def main():
+    """Main function to run the To-Do List application."""
+    tasks = load_tasks()
+    while True:
+        print("\nPersonal To-Do List Application")
+        print("1. Add Task")
+        print("2. View Tasks")
+        print("3. Mark Task Completed")
+        print("4. Delete Task")
+        print("5. Exit")
+        try:
+            choice = input("Choose an option (1-5): ").strip()
+            if choice == '1':
+                add_task(tasks)
+            elif choice == '2':
+                view_tasks(tasks)
+            elif choice == '3':
+                mark_task_completed(tasks)
+            elif choice == '4':
+                delete_task(tasks)
+            elif choice == '5':
+                save_tasks(tasks)
+                print("Goodbye!")
+                break
+            else:
+                print("Invalid choice. Please select 1-5.")
+        except KeyboardInterrupt:
+            print("\nProgram interrupted. Saving tasks and exiting.")
+            save_tasks(tasks)
+            break
+        except EOFError:
+            print("\nInput stream closed. Saving tasks and exiting.")
+            save_tasks(tasks)
+            break
+
+if __name__ == "__main__":
+    main()
